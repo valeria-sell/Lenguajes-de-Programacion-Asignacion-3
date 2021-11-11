@@ -1,11 +1,10 @@
 package main
 
 import (
+	"github.com/wcharczuk/go-chart"
 	"os"
 	"sort"
 	"strconv"
-
-	"github.com/wcharczuk/go-chart"
 )
 
 // Item2 receive a map to create bar chart->  (label)Key: int, (value)value: float64

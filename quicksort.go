@@ -4,11 +4,12 @@ import (
 	"math/rand"
 )
 
-func quicksort(a []int) []int {
+//Own Code
+func quicksort(a []float64, b chan []int) chan []int {
 	if len(a) < 2 {
-		return a
+		b <- []int{0,len(a)}
+		return b
 	}
-
 	left, right := 0, len(a)-1
 
 	pivot := rand.Int() % len(a)
@@ -20,13 +21,14 @@ func quicksort(a []int) []int {
 			a[left], a[i] = a[i], a[left]
 			left++
 		}
+
 	}
 
 	a[left], a[right] = a[right], a[left]
 
-	quicksort(a[:left])
-	quicksort(a[left+1:])
-
-	return a
+	quicksort(a[:left],b)
+	quicksort(a[left+1:],b)
+	b <- []int{0,len(a)}
+	return b
 }
 
