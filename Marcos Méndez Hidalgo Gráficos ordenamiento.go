@@ -13,20 +13,16 @@ https://tecadmin.net/get-current-date-time-golang/
 package main
 
 import (
-	"fmt"
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
 	"strconv"
-	"time"
 )
-
-
 
 /*
 Generates a 3 digit number between 0-599 from the system hour
 */
-func generateSeed() int{
-/* CÓDIGO OMITIDO */
+func generateSeed() int {
+	/* CÓDIGO OMITIDO */
 	return 1 // num
 }
 
@@ -34,20 +30,20 @@ func generateSeed() int{
 creates a N size slice with random numbers based on the linear congruential method
 output: slice with N random integers
 */
-func randomSlice(size int) []float64{
+func randomSlice(size int) []float64 {
 	var slice = make([]float64, size)
-/* CÓDIGO OMITIDO */
+	/* CÓDIGO OMITIDO */
 	return slice
 }
 
 /*
 Aux function to swap two numbers
 */
-func swap (a *float64, b *float64){
+/*func swap (a *float64, b *float64){
 	temp := *a
 	*a = *b
 	*b = temp
-}
+}*/
 
 /*
 Aux function to remove an element from a slice
@@ -92,7 +88,7 @@ func remove(slice [][]int, index int) [][]int {
 
 /*
 Iterative quicksort
- */
+*/
 //func quickSort(slice []float64, size int, pair chan []int) {
 //	/* CÓDIGO OMITIDO */
 //	for len(stack) > 0{
@@ -112,12 +108,9 @@ Iterative quicksort
 //	/* CÓDIGO OMITIDO */
 //}
 
-
-
-
 /*
 Bubblesort graphic drawer
- */
+*/
 /*func bsChartDrawer(slice []float64)  {
 	bsChart.Data = make([]float64, len(slice))
 	copy(bsChart.Data, slice)
@@ -142,7 +135,7 @@ Bubblesort graphic drawer
 /*
 Quicksort graphic drawer
 */
-func qsChartDrawer(slice []float64){
+/*func qsChartDrawer(slice []float64){
 	qsChart.Data = make([]float64, len(slice))
 	copy(qsChart.Data, slice)
 	fmt.Println(qsChart.Data)
@@ -167,21 +160,21 @@ func qsChartDrawer(slice []float64){
 	m.Lock()
 	ui.Render(&qsChart)
 	m.Unlock()
-}
+}*/
 
 func generateLabels(slice []float64) []string {
 	var labels = make([]string, len(slice))
-	for i := range slice{
+	for i := range slice {
 		labels[i] = strconv.Itoa(i)
 	}
 	return labels
 }
 
-func initBsChart(slice []float64)  {
+func initBsChart(slice []float64) {
 	bsChart = *widgets.NewBarChart()
 	bsChart.Data = slice
 	bsChart.Title = "BubbleSort"
-	bsChart.SetRect(0, 0, width, height - 2)
+	bsChart.SetRect(0, 0, width, height-2)
 	bsChart.BarWidth = BAR_WIDTH
 	bsChart.BarGap = 0
 	bsChart.Labels = generateLabels(slice)
@@ -191,11 +184,11 @@ func initBsChart(slice []float64)  {
 	bsChart.NumStyles = []ui.Style{ui.NewStyle(ui.ColorBlack)}
 }
 
-func initQsChart(slice []float64){
+func initQsChart(slice []float64) {
 	qsChart = *widgets.NewBarChart()
 	qsChart.Data = slice
 	qsChart.Title = "QuickSort"
-	qsChart.SetRect(0, height-2, width, height*2 - 3)
+	qsChart.SetRect(0, height-2, width, height*2-3)
 	qsChart.BarWidth = BAR_WIDTH
 	qsChart.BarGap = 0
 	qsChart.Labels = generateLabels(slice)

@@ -7,7 +7,7 @@ import (
 //Own Code
 func quicksort(a []float64, b chan []int) chan []int {
 	if len(a) < 2 {
-		b <- []int{0,len(a)}
+		b <- []int{0, len(a)}
 		return b
 	}
 	left, right := 0, len(a)-1
@@ -23,12 +23,10 @@ func quicksort(a []float64, b chan []int) chan []int {
 		}
 
 	}
-
 	a[left], a[right] = a[right], a[left]
 
-	quicksort(a[:left],b)
-	quicksort(a[left+1:],b)
-	b <- []int{0,len(a)}
+	go quicksort(a[:left], b)
+	go quicksort(a[left+1:], b)
+	b <- []int{0, len(a)}
 	return b
 }
-
