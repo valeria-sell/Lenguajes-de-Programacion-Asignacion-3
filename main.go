@@ -37,7 +37,7 @@ var (
 )
 
 func main() {
-	size := 20
+	size := 10
 	intBaseSlice := gen_array(size)
 	fmt.Println(intBaseSlice)
 	//heapSort(intBaseSlice, size)

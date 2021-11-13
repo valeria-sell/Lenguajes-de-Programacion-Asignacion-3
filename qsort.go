@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	ui "github.com/gizak/termui/v3"
+	"time"
 )
 
 //CODE FROM 	https://www.educative.io/edpresso/how-to-implement-a-stack-in-golang
@@ -36,20 +38,23 @@ func swap(a *int, b *int) {
 }
 
 /* This function is same in both iterative and recursive*/
-func partition(arr []int, l int, h int, canales chan []int) int {
+func partition(arr []int, l int, h int, canales chan []int, p *int) {
 	x := arr[h]
 	i := l - 1
 	for j := l; j <= h-1; j++ {
 		if arr[j] <= x {
 			i++
 			swap(&arr[i], &arr[j])
-			canales <- []int{j, i + 1}
+			fmt.Println("i ", i, " j ", j)
+			canales <- []int{i, j}
 		}
 	}
 	swap(&arr[i+1], &arr[h])
 	canales <- []int{i + 1, h}
-	fmt.Println(&canales)
-	return i + 1
+	*p = i + 1
+	fmt.Println("p go", *p)
+	close(canales)
+	//return i + 1
 }
 
 /* A[] --> Array to be sorted,
@@ -59,6 +64,9 @@ func partition(arr []int, l int, h int, canales chan []int) int {
 func quickSortIterative(arr []int, l int, h int) {
 	// Create an auxiliary stack
 	//len := h - l + 1
+
+	bc := paint(arr)
+
 	var stack Stack
 
 	// initialize top of stack
@@ -69,10 +77,10 @@ func quickSortIterative(arr []int, l int, h int) {
 	stack.Push(l) //push l
 	top += 1
 	stack.Push(h) //push h
-	pairsChannel := make(chan []int)
 
 	// Keep popping from stack while is not empty
 	for top >= 0 {
+		pairsChannel := make(chan []int)
 		// Pop h and l
 		top -= 1
 		h, _ = stack.Pop() //pop
@@ -81,11 +89,20 @@ func quickSortIterative(arr []int, l int, h int) {
 
 		// Set pivot element at its correct position
 		// in sorted array
-		p := partition(arr, l, h, pairsChannel)
-
+		var p int
+		go partition(arr, l, h, pairsChannel, &p)
 		for pair := range pairsChannel {
 			fmt.Println(pair)
+			m.Lock()
+			//update(pair,*bc)
+
+			swapFloats(&(bc.Data[pair[0]]), &(bc.Data[pair[1]]))
+			fmt.Println(bc.Data)
+			ui.Render(&bc)
+			time.Sleep(100 * time.Millisecond)
+			m.Unlock()
 		}
+		fmt.Println("p ", p)
 
 		// If there are elements on left side of pivot,
 		// then push left side to stack
