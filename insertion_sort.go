@@ -10,11 +10,12 @@ var (
 	totalTimeIS    time.Duration
 )
 
-func grapInsertioSort(randList []int) {
+func graphInsertionSort(randList []int, updater chan []int) {
 	pairsChannel := make(chan []int)
 	go insertionSort(randList, len(randList), pairsChannel)
 	for pair := range pairsChannel {
-		fmt.Println(pair)
+		//fmt.Println(pair)
+		updater <- pair
 		/*m.Lock()
 		//update(pair,*bc)
 
@@ -24,7 +25,8 @@ func grapInsertioSort(randList []int) {
 		time.Sleep(100 * time.Millisecond)
 		m.Unlock()*/
 	}
-	fmt.Println(randList)
+	//fmt.Println(randList)
+	close(updater)
 }
 
 func insertionSort(arr []int, size int, canales chan []int) {
