@@ -42,6 +42,7 @@ func main() {
 	fmt.Println(intBaseSlice)
 	//heapSort(intBaseSlice, size)
 	quickSortIterative(intBaseSlice, 0, size-1)
+	//grapInsertioSort(intBaseSlice)
 	fmt.Println(intBaseSlice)
 
 	/*	floatBaseSlice := make([]float64, len(intBaseSlice))
