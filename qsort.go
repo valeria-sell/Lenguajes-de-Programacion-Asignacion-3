@@ -1,9 +1,6 @@
 package main
 
 import (
-	"fmt"
-	ui "github.com/gizak/termui/v3"
-	"strconv"
 	"time"
 )
 
@@ -11,6 +8,7 @@ var (
 	comparissonsQS = 0
 	swapsQS        = 0
 	totalTimeQS    time.Duration
+	swapers        [][]int
 )
 
 //CODE FROM 	https://www.educative.io/edpresso/how-to-implement-a-stack-in-golang
@@ -53,7 +51,7 @@ func partition(arr []int, l int, h int, canales chan []int, p *int) {
 		if arr[j] <= x {
 			i++
 			swap(&arr[i], &arr[j])
-			fmt.Println("i ", i, " j ", j)
+			//fmt.Println("i ", i, " j ", j)
 			canales <- []int{i, j}
 			swapsQS++
 		}
@@ -63,7 +61,7 @@ func partition(arr []int, l int, h int, canales chan []int, p *int) {
 
 	canales <- []int{i + 1, h}
 	*p = i + 1
-	fmt.Println("p go", *p)
+	//fmt.Println("p go", *p)
 	close(canales)
 	//return i + 1
 }
@@ -72,7 +70,7 @@ func partition(arr []int, l int, h int, canales chan []int, p *int) {
    l --> Starting index,
    h --> Ending index */
 
-func quickSortIterative(arr []int, l int, h int) {
+func graphQuickSort(arr []int, l int, h int, updater chan []int) {
 	// Create an auxiliary stack
 	//len := h - l + 1
 	startTimeQS := time.Now()
@@ -81,7 +79,7 @@ func quickSortIterative(arr []int, l int, h int) {
 	copy(original, arr)
 	var stack Stack
 
-	paint2(original)
+	//paint2(original)
 
 	// initialize top of stack
 	top := -1
@@ -106,22 +104,12 @@ func quickSortIterative(arr []int, l int, h int) {
 		var p int
 		go partition(arr, l, h, pairsChannel, &p)
 		for pair := range pairsChannel {
-			fmt.Println(pair)
 			//fmt.Println(arr)
 			m.Lock()
-			//update(original,*bc)
-
-			/*fmt.Println(original)
-			swap(&original[pair[0]],&original[pair[1]])
-			fmt.Println(original)*/
-			swapFloats(&(bsChart.Data[pair[0]]), &(bsChart.Data[pair[1]]))
-			fmt.Println(bsChart.Data)
-			bsChart.Title = "holi" + strconv.FormatInt(int64(pair[0]), 10)
-			ui.Render(&bsChart)
-			time.Sleep(500 * time.Millisecond)
+			updater <- pair
 			m.Unlock()
 		}
-		fmt.Println("p ", p)
+		//fmt.Println("p ", p)
 
 		// If there are elements on left side of pivot,
 		// then push left side to stack
@@ -142,8 +130,8 @@ func quickSortIterative(arr []int, l int, h int) {
 		}
 	}
 	totalTimeQS = time.Since(startTimeQS)
-	fmt.Println(totalTimeQS)
-
+	//fmt.Println(totalTimeQS)
+	close(updater)
 }
 
 /*

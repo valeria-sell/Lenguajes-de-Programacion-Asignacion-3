@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -11,11 +10,12 @@ var (
 	totalTimeHS    time.Duration
 )
 
-func graphHeapSort(randList []int) {
+func graphHeapSort(randList []int, updater chan []int) {
 	pairsChannel := make(chan []int)
 	go heapSort(randList, len(randList), pairsChannel)
 	for pair := range pairsChannel {
-		fmt.Println(pair)
+		//fmt.Println(pair)
+		updater <- pair
 		/*m.Lock()
 		//update(pair,*bc)
 
@@ -25,7 +25,8 @@ func graphHeapSort(randList []int) {
 		time.Sleep(100 * time.Millisecond)
 		m.Unlock()*/
 	}
-	fmt.Println(randList)
+	//fmt.Println(randList)
+	close(updater)
 }
 
 func buildMaxHeap(arr []int, n int, canales chan []int) {
@@ -86,7 +87,7 @@ func heapSort(arr []int, n int, canales chan []int) {
 	}
 	close(canales)
 	totalTimeHS = time.Since(startTimeHS)
-	fmt.Println(totalTimeHS)
+	//fmt.Println(totalTimeHS)
 }
 
 /*

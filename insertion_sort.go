@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -44,5 +43,5 @@ func insertionSort(arr []int, size int, canales chan []int) {
 	}
 	close(canales)
 	totalTimeIS = time.Since(startTimeIS)
-	fmt.Println(totalTimeIS)
+	//fmt.Println(totalTimeIS)
 }

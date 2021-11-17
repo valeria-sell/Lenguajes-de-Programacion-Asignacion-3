@@ -170,7 +170,7 @@ func generateLabels(slice []float64) []string {
 	return labels
 }
 
-func initBsChart(slice []float64) {
+/*func initBsChart(slice []float64) {
 	bsChart = *widgets.NewBarChart()
 	bsChart.Data = slice
 	bsChart.Title = "BubbleSort"
@@ -182,7 +182,7 @@ func initBsChart(slice []float64) {
 	bsChart.BorderBottom = false
 	bsChart.BarColors = []ui.Color{ui.ColorRed}
 	bsChart.NumStyles = []ui.Style{ui.NewStyle(ui.ColorBlack)}
-}
+}*/
 
 func initQsChart(slice []float64) {
 	qsChart = *widgets.NewBarChart()

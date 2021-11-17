@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -11,11 +10,12 @@ var (
 	totalTimeBS    time.Duration
 )
 
-func graphBubbleSort(randList []int) {
+func graphBubbleSort(randList []int, updater chan []int) {
 	pairsChannel := make(chan []int)
 	go bubbleSort(randList, pairsChannel)
 	for pair := range pairsChannel {
-		fmt.Println(pair)
+		//fmt.Println(pair)
+		updater <- pair
 		/*m.Lock()
 		//update(pair,*bc)
 
@@ -25,7 +25,8 @@ func graphBubbleSort(randList []int) {
 		time.Sleep(100 * time.Millisecond)
 		m.Unlock()*/
 	}
-	fmt.Println(randList)
+	//fmt.Println(randList)
+	close(updater)
 }
 
 func bubbleSort(arr []int, canales chan []int) {
@@ -43,5 +44,5 @@ func bubbleSort(arr []int, canales chan []int) {
 	}
 	close(canales)
 	totalTimeBS = time.Since(startTimeBS)
-	fmt.Println(totalTimeBS)
+	//fmt.Println(totalTimeBS)
 }

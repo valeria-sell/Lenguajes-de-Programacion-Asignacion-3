@@ -5,45 +5,29 @@ package main
 
 import (
 	"fmt"
-	"github.com/gizak/termui/v3/widgets"
-	"github.com/lxn/win"
-	"sync"
-	"time"
-)
-
-const (
-	BAR_WIDTH       = 3
-	FONT_WIDTH      = 8
-	FONT_HEIGHT     = 16
-	MAX_NUMBER_SIZE = 32
-)
-
-var (
-	width   int = int(win.GetSystemMetrics(win.SM_CXSCREEN) / FONT_WIDTH)
-	height  int = int(win.GetSystemMetrics(win.SM_CYSCREEN) / (FONT_HEIGHT * 2))
-	bsChart widgets.BarChart
-	qsChart widgets.BarChart
-	m       sync.Mutex
-
-	bsTime        time.Duration
-	bsSwaps       = 0
-	bsComparisons = 0
-	bsIterations  = 0
-
-	qsTime        time.Duration
-	qsSwaps       = 0
-	qsComparisons = 0
-	qsIterations  = 0
 )
 
 func main() {
-	size := 10
+	size := 100
 	intBaseSlice := gen_array(size)
-	fmt.Println(intBaseSlice)
+	nuevo := make([]int, size)
+	_ = copy(nuevo, intBaseSlice)
+	//fmt.Println(nuevo, n)
 	//heapSort(intBaseSlice, size)
-	quickSortIterative(intBaseSlice, 0, size-1)
+	//quickSortIterative(intBaseSlice, 0, size-1)
 	//grapInsertioSort(intBaseSlice)
+	//exec(intBaseSlice)
+	/*pairsChannel := make(chan []int)
+	go quickSortIterative(intBaseSlice, 0, size-1, pairsChannel)
 	fmt.Println(intBaseSlice)
+	for pair := range pairsChannel{
+		fmt.Println(pair)
+		swap(&nuevo[pair[0]],&nuevo[pair[1]])
+		fmt.Println(nuevo)
+	}*/
+
+	exect(nuevo)
+	//fmt.Println(intBaseSlice)
 
 	/*	floatBaseSlice := make([]float64, len(intBaseSlice))
 		pairsChannel := make(chan []int)

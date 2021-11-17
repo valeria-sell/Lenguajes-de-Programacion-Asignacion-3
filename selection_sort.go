@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -11,11 +10,11 @@ var (
 	totalTimeSS    time.Duration
 )
 
-func graphSelectionSort(randList []int) {
+func graphSelectionSort(randList []int, updater chan []int) {
 	pairsChannel := make(chan []int)
 	go selectionsort(randList, pairsChannel)
 	for pair := range pairsChannel {
-		fmt.Println(pair)
+		//fmt.Println(pair)
 		/*m.Lock()
 		//update(pair,*bc)
 
@@ -24,8 +23,11 @@ func graphSelectionSort(randList []int) {
 		ui.Render(&bsChart)
 		time.Sleep(100 * time.Millisecond)
 		m.Unlock()*/
+		updater <- pair
+
 	}
-	fmt.Println(randList)
+	//fmt.Println(randList)
+	close(updater)
 
 }
 
@@ -46,5 +48,5 @@ func selectionsort(items []int, canales chan []int) {
 	}
 	close(canales)
 	totalTimeSS = time.Since(startTimeSS)
-	fmt.Println(totalTimeSS)
+	//fmt.Println(totalTimeSS)
 }
