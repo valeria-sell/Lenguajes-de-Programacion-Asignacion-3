@@ -32,23 +32,23 @@ func intListString(values int) []string {
 	return intStringSlice
 }
 
-func paint(randList []int) widgets.BarChart {
+func paint(randList []int) {
 	if err := ui.Init(); err != nil {
 		log.Fatalf("failed to initialize termui: %v", err)
 	}
 	defer ui.Close()
 
-	bc := widgets.NewBarChart()
-	bc.Data = intToFloat(randList)
-	bc.Labels = intListString(len(randList))
-	bc.Title = "Bar Chart QuickSort"
-	bc.SetRect(5, 5, 100, 25)
-	bc.BarWidth = 5
-	bc.BarColors = []ui.Color{ui.ColorRed, ui.ColorGreen}
-	bc.LabelStyles = []ui.Style{ui.NewStyle(ui.ColorBlue)}
-	bc.NumStyles = []ui.Style{ui.NewStyle(ui.ColorYellow)}
+	bsChart := widgets.NewBarChart()
+	bsChart.Data = intToFloat(randList)
+	bsChart.Labels = intListString(len(randList))
+	bsChart.Title = "Bar Chart QuickSort"
+	bsChart.SetRect(5, 5, 100, 25)
+	bsChart.BarWidth = 5
+	bsChart.BarColors = []ui.Color{ui.ColorRed, ui.ColorGreen}
+	bsChart.LabelStyles = []ui.Style{ui.NewStyle(ui.ColorBlue)}
+	bsChart.NumStyles = []ui.Style{ui.NewStyle(ui.ColorYellow)}
 
-	ui.Render(bc)
+	ui.Render(bsChart)
 
 	uiEvents := ui.PollEvents()
 	for {
@@ -59,7 +59,26 @@ func paint(randList []int) widgets.BarChart {
 		}
 	}
 
-	return *bc
+}
+
+func paint2(slice []int) {
+	if err := ui.Init(); err != nil {
+		log.Fatalf("failed to initialize termui: %v", err)
+	}
+
+	qsChart = *widgets.NewBarChart()
+	qsChart.Data = intToFloat(slice)
+	qsChart.Title = "QuickSort"
+	qsChart.SetRect(5, 5, 100, 25)
+	qsChart.BarWidth = BAR_WIDTH
+	qsChart.BarGap = 0
+	qsChart.Labels = intListString(len(slice))
+	qsChart.LabelStyles = []ui.Style{ui.NewStyle(ui.ColorWhite)}
+	qsChart.BarColors = []ui.Color{ui.ColorRed}
+	qsChart.NumStyles = []ui.Style{ui.NewStyle(ui.ColorBlack)}
+
+	ui.Render(&qsChart)
+	quickSortIterative(slice, 0, len(slice))
 }
 
 func update(pair []int, bar widgets.BarChart) {

@@ -3,7 +3,14 @@ package main
 import (
 	"fmt"
 	ui "github.com/gizak/termui/v3"
+	"strconv"
 	"time"
+)
+
+var (
+	comparissonsQS = 0
+	swapsQS        = 0
+	totalTimeQS    time.Duration
 )
 
 //CODE FROM 	https://www.educative.io/edpresso/how-to-implement-a-stack-in-golang
@@ -42,14 +49,18 @@ func partition(arr []int, l int, h int, canales chan []int, p *int) {
 	x := arr[h]
 	i := l - 1
 	for j := l; j <= h-1; j++ {
+		comparissonsQS++
 		if arr[j] <= x {
 			i++
 			swap(&arr[i], &arr[j])
 			fmt.Println("i ", i, " j ", j)
 			canales <- []int{i, j}
+			swapsQS++
 		}
 	}
 	swap(&arr[i+1], &arr[h])
+	swapsQS++
+
 	canales <- []int{i + 1, h}
 	*p = i + 1
 	fmt.Println("p go", *p)
@@ -64,10 +75,13 @@ func partition(arr []int, l int, h int, canales chan []int, p *int) {
 func quickSortIterative(arr []int, l int, h int) {
 	// Create an auxiliary stack
 	//len := h - l + 1
+	startTimeQS := time.Now()
 
-	bc := paint(arr)
-
+	original := make([]int, len(arr))
+	copy(original, arr)
 	var stack Stack
+
+	paint2(original)
 
 	// initialize top of stack
 	top := -1
@@ -93,13 +107,18 @@ func quickSortIterative(arr []int, l int, h int) {
 		go partition(arr, l, h, pairsChannel, &p)
 		for pair := range pairsChannel {
 			fmt.Println(pair)
+			//fmt.Println(arr)
 			m.Lock()
-			//update(pair,*bc)
+			//update(original,*bc)
 
-			swapFloats(&(bc.Data[pair[0]]), &(bc.Data[pair[1]]))
-			fmt.Println(bc.Data)
-			ui.Render(&bc)
-			time.Sleep(100 * time.Millisecond)
+			/*fmt.Println(original)
+			swap(&original[pair[0]],&original[pair[1]])
+			fmt.Println(original)*/
+			swapFloats(&(bsChart.Data[pair[0]]), &(bsChart.Data[pair[1]]))
+			fmt.Println(bsChart.Data)
+			bsChart.Title = "holi" + strconv.FormatInt(int64(pair[0]), 10)
+			ui.Render(&bsChart)
+			time.Sleep(500 * time.Millisecond)
 			m.Unlock()
 		}
 		fmt.Println("p ", p)
@@ -122,6 +141,9 @@ func quickSortIterative(arr []int, l int, h int) {
 			stack.Push(h) //push h
 		}
 	}
+	totalTimeQS = time.Since(startTimeQS)
+	fmt.Println(totalTimeQS)
+
 }
 
 /*
