@@ -4,48 +4,45 @@ import (
 	"fmt"
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
-	"github.com/lxn/win"
 	"log"
+	"math"
 	"strconv"
 	"sync"
 	"time"
 )
 
-const (
-	BAR_WIDTH       = 3
-	FONT_WIDTH      = 8
-	FONT_HEIGHT     = 16
-	MAX_NUMBER_SIZE = 32
-)
-
 var (
-	width    int = int(win.GetSystemMetrics(win.SM_CXSCREEN) / FONT_WIDTH)
-	height   int = int(win.GetSystemMetrics(win.SM_CYSCREEN) / (FONT_HEIGHT * 2))
-	bsChart  widgets.BarChart
-	qsChart  widgets.BarChart
-	ssChart  widgets.BarChart
-	hpsChart widgets.BarChart
-	isChart  widgets.BarChart
+	//Indicadores de las coordenadas Y para las funciones graficadoras
+	prvYSize  = 0
+	nextYSize = 6
 
-	m sync.Mutex
+	//Párrafos correspondientes a la información del programa
+	p      widgets.Paragraph // Párrafo de título
+	pTable widgets.Paragraph // Indicadores
+	pqs    widgets.Paragraph // Info del QuickSort
+	pss    widgets.Paragraph // Info del SelectionSort
+	pis    widgets.Paragraph // Info del BubbleSort
+	pbs    widgets.Paragraph // Info del InsertionSort
+	phs    widgets.Paragraph // Info del HeapSort
 
-	bsTime        time.Duration
-	bsSwaps       = 0
-	bsComparisons = 0
-	bsIterations  = 0
+	// Graficos de barras correspondientes a cada sort
+	bsChart  widgets.BarChart // BubbleSort
+	qsChart  widgets.BarChart // QuickSort
+	ssChart  widgets.BarChart // SelectionSort
+	hpsChart widgets.BarChart //HeapSort
+	isChart  widgets.BarChart //InsertionSort
 
-	qsTime        time.Duration
-	qsSwaps       = 0
-	qsComparisons = 0
-	qsIterations  = 0
+	m sync.Mutex //encargado de sincronizar los eventos y canales
 )
 
+// swapFloats: realiza un intercambio entre 2 elementos flotantes
 func swapFloats(a *float64, b *float64) {
 	temp := *a
 	*a = *b
 	*b = temp
 }
 
+// intToFloat: realiza un intercambio entre 2 elementos enteros
 func intToFloat(intBaseSlice []int) []float64 {
 	floatBaseSlice := make([]float64, len(intBaseSlice))
 	var v int
@@ -56,6 +53,7 @@ func intToFloat(intBaseSlice []int) []float64 {
 	return floatBaseSlice
 }
 
+// intListString: genera una lista de strings, con la cantidad de elementos dada
 func intListString(values int) []string {
 	intStringSlice := make([]string, values)
 	for i := 0; i < values; i++ {
@@ -64,108 +62,182 @@ func intListString(values int) []string {
 	return intStringSlice
 }
 
-func update(pair []int, bar widgets.BarChart) {
+// update: función encargada de realizar los intercambios de elementos dentro del gráfico correspondiente
+func update(pair []int, bar *widgets.BarChart) {
 	swapFloats(&(bar.Data[pair[0]]), &(bar.Data[pair[1]]))
-	//fmt.Println(bar.Data)
-	//ui.Render(&bar)
 }
-func exect(slice []int) {
+
+// paragraphs: función encargada de inicializar los valores de los párrafos a graficar, así como su diseño inicial
+func paragraphs() {
+	prvXSize := 0
+	nextXSize := 45
+	distance := 15
+
+	p = *widgets.NewParagraph()                              // Se crea el nuevo párrafo
+	p.Title = "Lenguajes de Programacion - Asignación # 3 "  //Asignación del título
+	p.Text = "Ana Maria Guevara Rosello\nValeria Sell Saenz" //Asignación del texto
+	p.SetRect(prvXSize, prvYSize, nextXSize, nextYSize)      //Ubicación según pares ordenados (x1,y1,x2,y2)
+	p.TextStyle.Fg = ui.ColorWhite                           //Color del texto
+	p.BorderStyle.Fg = ui.ColorCyan                          //Color del borde
+
+	prvXSize = nextXSize            // Se actualiza el ultimo valor de X2, como X1
+	nextXSize = prvXSize + distance // Se modifica el X2 según el tamaño deseado
+	pTable = *widgets.NewParagraph()
+	pTable.Title = "Sorts"
+	pTable.Text = "Comparaciones\nIntercambios\nOpElementales\nTiempo"
+	pTable.SetRect(prvXSize, prvYSize, nextXSize, nextYSize)
+	pTable.TextStyle.Fg = ui.ColorWhite
+	pTable.BorderStyle.Fg = ui.ColorCyan
+
+	prvXSize = nextXSize
+	nextXSize = prvXSize + distance
+	pqs = *widgets.NewParagraph()
+	pqs.Title = "QuickSort" //color blanco al inicio, y parpadear en verde finalizar
+	pqs.Text = strconv.Itoa(comparissonsQS) + "\n" + strconv.Itoa(swapsQS) + "\n" + strconv.Itoa(evalsQS) + "\n" + totalTimeQS.String()
+	pqs.SetRect(prvXSize, prvYSize, nextXSize, nextYSize)
+	pqs.TitleStyle.Fg = ui.ColorWhite
+	pqs.TextStyle.Fg = ui.ColorWhite
+	pqs.BorderStyle.Fg = ui.ColorCyan
+
+	prvXSize = nextXSize
+	nextXSize = prvXSize + distance
+	pss = *widgets.NewParagraph()
+	pss.Title = "Selection" //color blanco al inicio, y parpadear en verde finalizar
+	pss.Text = strconv.Itoa(comparissonsSS) + "\n" + strconv.Itoa(swapsSS) + "\n" + strconv.Itoa(evalsSS) + "\n" + totalTimeSS.String()
+	pss.SetRect(prvXSize, prvYSize, nextXSize, nextYSize)
+	pss.TitleStyle.Fg = ui.ColorWhite
+	pss.TextStyle.Fg = ui.ColorWhite
+	pss.BorderStyle.Fg = ui.ColorCyan
+
+	prvXSize = nextXSize
+	nextXSize = prvXSize + distance
+	pis = *widgets.NewParagraph()
+	pis.Title = "Insertion" //color blanco al inicio, y parpadear en verde finalizar
+	pis.Text = strconv.Itoa(comparissonsIS) + "\n" + strconv.Itoa(swapsIS) + "\n" + strconv.Itoa(evalsIS) + "\n" + totalTimeIS.String()
+	pis.SetRect(prvXSize, prvYSize, nextXSize, nextYSize)
+	pis.TitleStyle.Fg = ui.ColorWhite
+	pis.TextStyle.Fg = ui.ColorWhite
+	pis.BorderStyle.Fg = ui.ColorCyan
+
+	prvXSize = nextXSize
+	nextXSize = prvXSize + distance
+	pbs = *widgets.NewParagraph()
+	pbs.Title = "Bubble" //color blanco al inicio, y parpadear en verde finalizar
+	pbs.Text = strconv.Itoa(comparissonsBS) + "\n" + strconv.Itoa(swapsBS) + "\n" + strconv.Itoa(evalsBS) + "\n" + totalTimeBS.String()
+	pbs.SetRect(prvXSize, prvYSize, nextXSize, nextYSize)
+	pbs.TitleStyle.Fg = ui.ColorWhite
+	pbs.TextStyle.Fg = ui.ColorWhite
+	pbs.BorderStyle.Fg = ui.ColorCyan
+
+	prvXSize = nextXSize
+	nextXSize = prvXSize + distance
+	phs = *widgets.NewParagraph()
+	phs.Title = "Heap" //color blanco al inicio, y parpadear en verde finalizar
+	phs.Text = strconv.Itoa(comparissonsHS) + "\n" + strconv.Itoa(swapsHS) + "\n" + strconv.Itoa(evalsHPS) + "\n" + totalTimeHS.String()
+	phs.SetRect(prvXSize, prvYSize, nextXSize, nextYSize)
+	phs.TitleStyle.Fg = ui.ColorWhite
+	phs.TextStyle.Fg = ui.ColorWhite
+	phs.BorderStyle.Fg = ui.ColorCyan
+
+	prvYSize = nextYSize
+}
+
+// barchars: función encargada de inicializar los valores de los gráficos de barras, así como su diseño inicial
+func barchars(size int) {
+	labels := intListString(size)
+
+	//Se utiliza un tamaño dinámico para el ancho de los gráficos de barras
+	fullYSize := 202
+	ySize := int(math.Ceil((float64(size)/100.0)*float64(fullYSize))) + 1
+
+	qsChart = *widgets.NewBarChart() // Se crea una nueva BarChart
+	qsChart.Title = "QS Chart"       // Se define su título
+	nextYSize = prvYSize + 9
+	qsChart.SetRect(0, prvYSize, ySize, nextYSize)                                          //Ubicación según pares ordenados (x1,y1,x2,y2)
+	qsChart.Labels = labels                                                                 // Se usan los labels creados previamente
+	qsChart.LabelStyles = []ui.Style{ui.NewStyle(ui.ColorWhite), ui.NewStyle(ui.ColorCyan)} //Se define el estilo y color de los labels
+	qsChart.NumStyles = []ui.Style{ui.NewStyle(ui.ColorBlack)}                              // Se define el estilo y color de los números en las barras
+	qsChart.BarWidth = 1                                                                    // Ancho de las barras
+
+	prvYSize = nextYSize
+	nextYSize = prvYSize + 9
+	ssChart = *widgets.NewBarChart()
+	ssChart.Title = "SS Chart"
+	ssChart.SetRect(0, prvYSize, ySize, nextYSize)
+	ssChart.Labels = labels
+	ssChart.LabelStyles = []ui.Style{ui.NewStyle(ui.ColorWhite), ui.NewStyle(ui.ColorCyan)}
+	ssChart.NumStyles = []ui.Style{ui.NewStyle(ui.ColorBlack)}
+	ssChart.BarWidth = 1
+
+	prvYSize = nextYSize
+	nextYSize = prvYSize + 9
+	isChart = *widgets.NewBarChart()
+	isChart.Title = "IS Chart"
+	isChart.SetRect(0, prvYSize, ySize, nextYSize)
+	isChart.Labels = labels
+	isChart.LabelStyles = []ui.Style{ui.NewStyle(ui.ColorWhite), ui.NewStyle(ui.ColorCyan)}
+	isChart.NumStyles = []ui.Style{ui.NewStyle(ui.ColorBlack)}
+	isChart.BarWidth = 1
+
+	prvYSize = nextYSize
+	nextYSize = prvYSize + 9
+	bsChart = *widgets.NewBarChart()
+	bsChart.Title = "BS Chart"
+	bsChart.SetRect(0, prvYSize, ySize, nextYSize)
+	bsChart.Labels = labels
+	bsChart.LabelStyles = []ui.Style{ui.NewStyle(ui.ColorWhite), ui.NewStyle(ui.ColorCyan)}
+	bsChart.NumStyles = []ui.Style{ui.NewStyle(ui.ColorBlack)}
+	bsChart.BarWidth = 1
+
+	prvYSize = nextYSize
+	nextYSize = prvYSize + 9
+	hpsChart = *widgets.NewBarChart()
+	hpsChart.Title = "HPS Chart"
+	hpsChart.SetRect(0, prvYSize, ySize, nextYSize)
+	hpsChart.Labels = labels
+	hpsChart.LabelStyles = []ui.Style{ui.NewStyle(ui.ColorWhite), ui.NewStyle(ui.ColorCyan)}
+	hpsChart.NumStyles = []ui.Style{ui.NewStyle(ui.ColorBlack)}
+	hpsChart.BarWidth = 1
+}
+
+// graficar: Función encargada de llevar a cabo todos los procesos de unión entre los gráficos y las gorrutinas de ordenamientos
+// Esta función recibe unicamente la lista de elementos original para relizar los ordenamientos
+func graficar(slice []int) {
+	// En caso de que haya un error en la graficación, el programa lo indicará y esperará un input
 	if err := ui.Init(); err != nil {
 		log.Fatalf("failed to initialize termui: %v", err)
 		fmt.Scanln()
 	}
 	defer ui.Close()
 
-	p := widgets.NewParagraph()
-	p.Title = "Lenguajes de Programacion - Asignación # 3 "
-	p.Text = "Ana Maria Guevara Rosello\nValeria Sell Saenz"
-	p.SetRect(0, 0, 50, 4)
-	p.TextStyle.Fg = ui.ColorWhite
-	p.BorderStyle.Fg = ui.ColorCyan
-
-	updateParagraph := func(count int) {
+	//función utilizada para modificar el color de un título en caso de éxito en su ordenamiento
+	successTitleColor := func(count int, p *widgets.Paragraph) {
 		if count%2 == 0 {
-			p.TextStyle.Fg = ui.ColorRed
+			p.TitleStyle.Fg = ui.ColorBlack
 		} else {
-			p.TextStyle.Fg = ui.ColorWhite
+			p.TitleStyle.Fg = ui.ColorGreen
 		}
 	}
 
-	/*
-		sparklineData := []float64{4, 2, 1, 6, 3, 9, 1, 4, 2, 15, 14, 9, 8, 6, 10, 13, 15, 12, 10, 5, 3, 6, 1, 7, 10, 10, 14, 13, 6, 4, 2, 1, 6, 3, 9, 1, 4, 2, 15, 14, 9, 8, 6, 10, 13, 15, 12, 10, 5, 3, 6, 1, 7, 10, 10, 14, 13, 6, 4, 2, 1, 6, 3, 9, 1, 4, 2, 15, 14, 9, 8, 6, 10, 13, 15, 12, 10, 5, 3, 6, 1, 7, 10, 10, 14, 13, 6, 4, 2, 1, 6, 3, 9, 1, 4, 2, 15, 14, 9, 8, 6, 10, 13, 15, 12, 10, 5, 3, 6, 1, 7, 10, 10, 14, 13, 6}
-
-		sl := widgets.NewSparkline()
-		sl.Title = "srv 0:"
-		sl.Data = sparklineData
-		sl.LineColor = ui.ColorCyan
-		sl.TitleStyle.Fg = ui.ColorWhite
-
-		sl2 := widgets.NewSparkline()
-		sl2.Title = "srv 1:"
-		sl2.Data = sparklineData
-		sl2.TitleStyle.Fg = ui.ColorWhite
-		sl2.LineColor = ui.ColorRed
-
-		slg := widgets.NewSparklineGroup(sl, sl2)
-		slg.Title = "Sparkline"
-		slg.SetRect(25, 5, 50, 12)*/
-
-	//barchartData := []float64{3, 2, 5, 3, 9 5, 3, 2, 5, 8, 3, 2, 4, 5, 3, 2, 5, 7, 5, 3, 2, 6, 7, 4, 6, 3, 6, 7, 8, 3, 6, 4, 5, 3, 2, 4, 6, 4, 8, 5, 9, 4, 3, 6, 5, 3, 6}
-	labels := intListString(len(slice))
-	qsChart = *widgets.NewBarChart()
-	qsChart.Title = "QS Chart"
-	qsChart.SetRect(0, 4, 202, 13)
-	qsChart.Labels = labels
-	qsChart.BarColors[0] = ui.ColorGreen
-	qsChart.NumStyles[0] = ui.NewStyle(ui.ColorBlack)
-	qsChart.BarWidth = 1
-
-	ssChart = *widgets.NewBarChart()
-	ssChart.Title = "SS Chart"
-	ssChart.SetRect(0, 13, 200, 22)
-	ssChart.Labels = labels
-	ssChart.BarColors[0] = ui.ColorGreen
-	ssChart.NumStyles[0] = ui.NewStyle(ui.ColorBlack)
-	ssChart.BarWidth = 1
-
-	isChart := *widgets.NewBarChart()
-	isChart.Title = "IS Chart"
-	isChart.SetRect(0, 22, 200, 31)
-	isChart.Labels = labels
-	isChart.BarColors[0] = ui.ColorGreen
-	isChart.NumStyles[0] = ui.NewStyle(ui.ColorBlack)
-	isChart.BarWidth = 1
-
-	bsChart = *widgets.NewBarChart()
-	bsChart.Title = "BS Chart"
-	bsChart.SetRect(0, 31, 200, 40)
-	bsChart.Labels = labels
-	bsChart.BarColors[0] = ui.ColorGreen
-	bsChart.NumStyles[0] = ui.NewStyle(ui.ColorBlack)
-	bsChart.BarWidth = 1
-
-	hpsChart = *widgets.NewBarChart()
-	hpsChart.Title = "HPS Chart"
-	hpsChart.SetRect(0, 40, 200, 49)
-	hpsChart.Labels = labels
-	hpsChart.BarColors[0] = ui.ColorGreen
-	hpsChart.NumStyles[0] = ui.NewStyle(ui.ColorBlack)
-	hpsChart.BarWidth = 1
-
-	p2 := widgets.NewParagraph()
-	p2.Text = "Hey!\nI am a borderless block!"
-	p2.Border = false
-	p2.SetRect(50, 10, 75, 10)
-	p2.TextStyle.Fg = ui.ColorMagenta
-
-	draw := func(count int) {
-		//slg.Sparklines[0].Data = sparklineData[:30+count%50]
-		//slg.Sparklines[1].Data = sparklineData[:35+count%50]
-		//ui.Render(p, &hpsChart, &bsChart, &isChart, &ssChart, &qsChart,p2)
-		ui.Render(p, &ssChart, &qsChart, &isChart, &bsChart, &hpsChart, p2)
-		//quickSortIterative(newData, 0, len(slice)-1)
+	// función encargada de actualizar los valores de los párrafos, estos corresponden a las estadísticas de los ordenamientos
+	updateParagraph := func(count int) {
+		pqs.Text = strconv.Itoa(comparissonsQS) + "\n" + strconv.Itoa(swapsQS) + "\n" + strconv.Itoa(evalsQS) + "\n" + totalTimeQS.String()
+		pss.Text = strconv.Itoa(comparissonsSS) + "\n" + strconv.Itoa(swapsSS) + "\n" + strconv.Itoa(evalsSS) + "\n" + totalTimeSS.String()
+		pis.Text = strconv.Itoa(comparissonsIS) + "\n" + strconv.Itoa(swapsIS) + "\n" + strconv.Itoa(evalsIS) + "\n" + totalTimeIS.String()
+		pbs.Text = strconv.Itoa(comparissonsBS) + "\n" + strconv.Itoa(swapsBS) + "\n" + strconv.Itoa(evalsBS) + "\n" + totalTimeBS.String()
+		phs.Text = strconv.Itoa(comparissonsHS) + "\n" + strconv.Itoa(swapsHS) + "\n" + strconv.Itoa(evalsHPS) + "\n" + totalTimeHS.String()
 	}
 
+	//Se lleva a cabo la inicialización de los párrafos y los gráficos de barras
+	paragraphs()
+	barchars(len(slice))
+
+	// función encargada de renderizar, es decir, dibujar los gráficos en consola
+	draw := func() {
+		ui.Render(&p, &pTable, &pqs, &pss, &pis, &pbs, &phs, &qsChart, &ssChart, &isChart, &bsChart, &hpsChart)
+	}
+
+	//Se realiza una copia de la lista original de números para cada ordenamiento
 	quickSortData := make([]int, len(slice))
 	_ = copy(quickSortData, slice)
 	qsChart.Data = intToFloat(quickSortData)
@@ -186,76 +258,74 @@ func exect(slice []int) {
 	_ = copy(heapSortData, slice)
 	hpsChart.Data = intToFloat(heapSortData)
 
+	//Se inicia un contador que nos será útil para la actualización de datos
 	tickerCount := 1
-	draw(tickerCount)
-	tickerCount++
+	draw()
 
+	// Se inician los canales, junto con sus recibidores, que podrán recibir datos de tipo []int
 	QSChannel := make(chan []int)
 	go graphQuickSort(quickSortData, 0, len(quickSortData)-1, QSChannel)
+
 	SSChannel := make(chan []int)
 	go graphSelectionSort(selectionSortData, SSChannel)
+
 	ISChannel := make(chan []int)
 	go insertionSort(insertionSortData, len(insertionSortData), ISChannel)
-	BSChannel := make(chan []int)
-	go graphSelectionSort(bubbleSortData, BSChannel)
-	HPSChannel := make(chan []int)
-	go graphSelectionSort(heapSortData, HPSChannel)
 
-	//uiEvents := ui.PollEvents()
-	//ticker := time.NewTicker(time.Second).C
+	BSChannel := make(chan []int)
+	go graphBubbleSort(bubbleSortData, BSChannel)
+
+	HPSChannel := make(chan []int)
+	go graphHeapSort(heapSortData, HPSChannel)
+
+	// Se hace uso de un ciclo infinito para la visualización de las gráficas
 	for {
-		time.Sleep(100 * time.Millisecond)
+		// Este for tendrá una espera de 0.3 segundos entre cada interecambio de valores en los ordenamientos
+		time.Sleep(300 * time.Millisecond)
+
+		//Cada canal recibe a su propio conjunto de datos, a travez de <-'SChannel , lo enviado por su algoritmo
+		// el primer ('sPair) valor corresponde a un par de números, que serán las ubicaciones de los números a intercambiar
+		// el segundo valor ('sOkay) será un boleano, encargado de decirnos si el canal se encuentra abierto o cerrado
 		qsPair, qsOk := <-QSChannel
 		ssPair, ssOk := <-SSChannel
 		isPair, isOk := <-ISChannel
 		bsPair, bsOk := <-BSChannel
 		hpsPair, hpsOk := <-HPSChannel
 
-		//fmt.Println(pair)
 		tickerCount++
+		// Si el canal se encuentre abierto, quiere decir que hay un par de elementos a intercambiar
 		if qsOk {
-			update(qsPair, qsChart)
-			//swapFloats(&qsChart.Data[pair[0]], &qsChart.Data[pair[1]])
-			//fmt.Println(swapsQS)
+			// Se realiza el intercambio
+			update(qsPair, &qsChart)
+			//En caso de que el canal se encuentre cerrado, quiere decir que el ordenamiento ha terminado
+		} else {
+			// Se usa un parpadeo verde en el título del ordenamiento para indicar que este fue éxitoso y ha terminado
+			successTitleColor(tickerCount, &pqs)
 		}
 		if ssOk {
-			update(ssPair, ssChart)
-			//swapFloats(&qsChart.Data[pair[0]], &qsChart.Data[pair[1]])
-			//fmt.Println(swapsQS)
+			update(ssPair, &ssChart)
+		} else {
+			successTitleColor(tickerCount, &pss)
 		}
 		if isOk {
-			update(isPair, isChart)
-			//swapFloats(&qsChart.Data[pair[0]], &qsChart.Data[pair[1]])
-			//fmt.Println(swapsQS)
+			update(isPair, &isChart)
+		} else {
+			successTitleColor(tickerCount, &pis)
 		}
 		if bsOk {
-			update(bsPair, bsChart)
-			//swapFloats(&qsChart.Data[pair[0]], &qsChart.Data[pair[1]])
-			//fmt.Println(swapsQS)
+			update(bsPair, &bsChart)
+		} else {
+			successTitleColor(tickerCount, &pbs)
 		}
 		if hpsOk {
-			update(hpsPair, hpsChart)
-			//swapFloats(&qsChart.Data[pair[0]], &qsChart.Data[pair[1]])
-			//fmt.Println(swapsQS)
+			update(hpsPair, &hpsChart)
+		} else {
+			successTitleColor(tickerCount, &phs)
 		}
-
+		// Al terminar de evaluar todos los canales, se actualizan las estadísticas y empieza de nuevo el ciclo
 		updateParagraph(tickerCount)
-		draw(tickerCount)
+		draw()
 	}
-
-	/*for pair := range pairsChannel{
-		//fmt.Println(pair)
-		swapFloats(&qsChart.Data[pair[0]],&qsChart.Data[pair[1]])
-		updateParagraph(tickerCount)
-		draw(tickerCount)
-		tickerCount++
-		fmt.Println(swapsQS)
-
-		if bsChart.Percent <= swapsQS/2 {
-			bsChart.Percent = tickerCount
-		}
-		//fmt.Println(nuevo)
-	}*/
 	fmt.Scanln()
 
 }

@@ -37,6 +37,7 @@ func insertionSort(arr []int, size int, canales chan []int) {
 		for j >= 0 && arr[j] > key {
 			comparissonsIS++
 			arr[j+1] = arr[j]
+			totalTimeIS = time.Since(startTimeIS)
 			canales <- []int{j, j + 1}
 			swapsIS++
 			j--

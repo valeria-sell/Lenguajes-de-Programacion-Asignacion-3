@@ -8,7 +8,6 @@ var (
 	comparissonsQS = 0
 	swapsQS        = 0
 	totalTimeQS    time.Duration
-	swapers        [][]int
 )
 
 //CODE FROM 	https://www.educative.io/edpresso/how-to-implement-a-stack-in-golang
@@ -66,10 +65,6 @@ func partition(arr []int, l int, h int, canales chan []int, p *int) {
 	//return i + 1
 }
 
-/* A[] --> Array to be sorted,
-   l --> Starting index,
-   h --> Ending index */
-
 func graphQuickSort(arr []int, l int, h int, updater chan []int) {
 	// Create an auxiliary stack
 	//len := h - l + 1
@@ -106,6 +101,7 @@ func graphQuickSort(arr []int, l int, h int, updater chan []int) {
 		for pair := range pairsChannel {
 			//fmt.Println(arr)
 			m.Lock()
+			totalTimeQS = time.Since(startTimeQS)
 			updater <- pair
 			m.Unlock()
 		}
@@ -133,19 +129,3 @@ func graphQuickSort(arr []int, l int, h int, updater chan []int) {
 	//fmt.Println(totalTimeQS)
 	close(updater)
 }
-
-/*
-// Driver code
-func main() int {
-
-int n = 5;
-int arr[n] = { 4, 2, 6, 9, 2 };
-
-quickSort(arr, 0, n - 1);
-
-for (int i = 0; i < n; i++) {
-out << arr[i] << " ";
-}
-
-return 0;
-}*/

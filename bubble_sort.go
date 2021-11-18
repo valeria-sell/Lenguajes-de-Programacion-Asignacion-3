@@ -14,29 +14,22 @@ func graphBubbleSort(randList []int, updater chan []int) {
 	pairsChannel := make(chan []int)
 	go bubbleSort(randList, pairsChannel)
 	for pair := range pairsChannel {
-		//fmt.Println(pair)
 		updater <- pair
-		/*m.Lock()
-		//update(pair,*bc)
-
-		swapFloats(&(bsChart.Data[pair[0]]), &(bsChart.Data[pair[1]]))
-		fmt.Println(bsChart.Data)
-		ui.Render(&bsChart)
-		time.Sleep(100 * time.Millisecond)
-		m.Unlock()*/
 	}
-	//fmt.Println(randList)
 	close(updater)
 }
 
 func bubbleSort(arr []int, canales chan []int) {
 	startTimeBS := time.Now()
-	len := len(arr)
-	for i := 0; i < len-1; i++ {
-		for j := 0; j < len-i-1; j++ {
+	l := len(arr)
+	for i := 0; i < l-1; i++ {
+		evalsBS++
+		for j := 0; j < l-i-1; j++ {
+			evalsBS++
 			comparissonsBS++
 			if arr[j] > arr[j+1] {
 				arr[j], arr[j+1] = arr[j+1], arr[j]
+				totalTimeBS = time.Since(startTimeBS)
 				canales <- []int{j, j + 1}
 				swapsBS++
 			}
@@ -44,5 +37,4 @@ func bubbleSort(arr []int, canales chan []int) {
 	}
 	close(canales)
 	totalTimeBS = time.Since(startTimeBS)
-	//fmt.Println(totalTimeBS)
 }

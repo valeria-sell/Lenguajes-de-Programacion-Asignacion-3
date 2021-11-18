@@ -14,18 +14,8 @@ func graphHeapSort(randList []int, updater chan []int) {
 	pairsChannel := make(chan []int)
 	go heapSort(randList, len(randList), pairsChannel)
 	for pair := range pairsChannel {
-		//fmt.Println(pair)
 		updater <- pair
-		/*m.Lock()
-		//update(pair,*bc)
-
-		swapFloats(&(bsChart.Data[pair[0]]), &(bsChart.Data[pair[1]]))
-		fmt.Println(bsChart.Data)
-		ui.Render(&bsChart)
-		time.Sleep(100 * time.Millisecond)
-		m.Unlock()*/
 	}
-	//fmt.Println(randList)
 	close(updater)
 }
 
@@ -55,6 +45,7 @@ func heapSort(arr []int, n int, canales chan []int) {
 		// swap value of first indexed
 		// with last indexed
 		swap(&arr[0], &arr[i])
+		totalTimeHS = time.Since(startTimeHS)
 		canales <- []int{0, i}
 		swapsHS++
 		// maintaining heap property
@@ -80,6 +71,7 @@ func heapSort(arr []int, n int, canales chan []int) {
 			if arr[j] < arr[index] && index < i {
 				swap(&arr[j], &arr[index])
 				swapsHS++
+				totalTimeHS = time.Since(startTimeHS)
 				canales <- []int{j, index}
 			}
 			j = index
@@ -89,26 +81,3 @@ func heapSort(arr []int, n int, canales chan []int) {
 	totalTimeHS = time.Since(startTimeHS)
 	//fmt.Println(totalTimeHS)
 }
-
-/*
-// Driver Code to test above
-int main()
-{
-int arr[] = {10, 20, 15, 17, 9, 21};
-int n = sizeof(arr) / sizeof(arr[0]);
-
-printf("Given array: ");
-for (int i = 0; i < n; i++)
-printf("%d ", arr[i]);
-
-printf("\n\n");
-
-heapSort(arr, n);
-
-// print array after sorting
-printf("Sorted array: ");
-for (int i = 0; i < n; i++)
-printf("%d ", arr[i]);
-
-return 0;
-}*/

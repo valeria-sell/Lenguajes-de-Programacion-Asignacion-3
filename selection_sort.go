@@ -14,19 +14,9 @@ func graphSelectionSort(randList []int, updater chan []int) {
 	pairsChannel := make(chan []int)
 	go selectionsort(randList, pairsChannel)
 	for pair := range pairsChannel {
-		//fmt.Println(pair)
-		/*m.Lock()
-		//update(pair,*bc)
-
-		swapFloats(&(bsChart.Data[pair[0]]), &(bsChart.Data[pair[1]]))
-		fmt.Println(bsChart.Data)
-		ui.Render(&bsChart)
-		time.Sleep(100 * time.Millisecond)
-		m.Unlock()*/
 		updater <- pair
 
 	}
-	//fmt.Println(randList)
 	close(updater)
 
 }
@@ -43,10 +33,10 @@ func selectionsort(items []int, canales chan []int) {
 			}
 		}
 		items[i], items[minIdx] = items[minIdx], items[i]
+		totalTimeSS = time.Since(startTimeSS)
 		canales <- []int{i, minIdx}
 		swapsSS++
 	}
 	close(canales)
 	totalTimeSS = time.Since(startTimeSS)
-	//fmt.Println(totalTimeSS)
 }
