@@ -7,6 +7,7 @@ import (
 var (
 	comparissonsIS = 0
 	swapsIS        = 0
+	evalsIS        = 0
 	totalTimeIS    time.Duration
 )
 
@@ -32,9 +33,11 @@ func graphInsertionSort(randList []int, updater chan []int) {
 func insertionSort(arr []int, size int, canales chan []int) {
 	startTimeIS := time.Now()
 	for i := 1; i < size; i++ {
+		evalsIS++
 		key := arr[i]
 		j := i - 1
 		for j >= 0 && arr[j] > key {
+			evalsIS++
 			comparissonsIS++
 			arr[j+1] = arr[j]
 			totalTimeIS = time.Since(startTimeIS)

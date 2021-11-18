@@ -7,6 +7,7 @@ import (
 var (
 	comparissonsBS = 0
 	swapsBS        = 0
+	evalsBS        = 0
 	totalTimeBS    time.Duration
 )
 
@@ -28,6 +29,7 @@ func bubbleSort(arr []int, canales chan []int) {
 			evalsBS++
 			comparissonsBS++
 			if arr[j] > arr[j+1] {
+				evalsBS++
 				arr[j], arr[j+1] = arr[j+1], arr[j]
 				totalTimeBS = time.Since(startTimeBS)
 				canales <- []int{j, j + 1}
