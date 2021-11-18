@@ -16,7 +16,6 @@ func graphSelectionSort(randList []int, updater chan []int) {
 	go selectionsort(randList, pairsChannel)
 	for pair := range pairsChannel {
 		updater <- pair
-
 	}
 	close(updater)
 
