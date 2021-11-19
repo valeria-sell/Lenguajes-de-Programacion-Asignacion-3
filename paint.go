@@ -210,9 +210,13 @@ func graficar(slice []int) {
 	}
 	defer ui.Close()
 
+	//Se inicia un contador que nos será útil para la actualización de datos
+	timeStart := time.Now()
+	tickerCount := int64(math.Round(time.Since(timeStart).Seconds()))
+
 	//función utilizada para modificar el color de un título en caso de éxito en su ordenamiento
-	successTitleColor := func(count int, p *widgets.Paragraph) {
-		if count%2 == 0 {
+	successTitleColor := func(p *widgets.Paragraph) {
+		if tickerCount%2 == 0 {
 			p.TitleStyle.Fg = ui.ColorBlack
 		} else {
 			p.TitleStyle.Fg = ui.ColorGreen
@@ -220,7 +224,7 @@ func graficar(slice []int) {
 	}
 
 	// función encargada de actualizar los valores de los párrafos, estos corresponden a las estadísticas de los ordenamientos
-	updateParagraph := func(count int) {
+	updateParagraph := func() {
 		pqs.Text = strconv.Itoa(comparissonsQS) + "\n" + strconv.Itoa(swapsQS) + "\n" + strconv.Itoa(evalsQS) + "\n" + totalTimeQS.String()
 		pss.Text = strconv.Itoa(comparissonsSS) + "\n" + strconv.Itoa(swapsSS) + "\n" + strconv.Itoa(evalsSS) + "\n" + totalTimeSS.String()
 		pis.Text = strconv.Itoa(comparissonsIS) + "\n" + strconv.Itoa(swapsIS) + "\n" + strconv.Itoa(evalsIS) + "\n" + totalTimeIS.String()
@@ -258,8 +262,6 @@ func graficar(slice []int) {
 	_ = copy(heapSortData, slice)
 	hpsChart.Data = intToFloat(heapSortData)
 
-	//Se inicia un contador que nos será útil para la actualización de datos
-	tickerCount := 1
 	draw()
 
 	// Se inician los canales, junto con sus recibidores, que podrán recibir datos de tipo []int
@@ -292,7 +294,9 @@ func graficar(slice []int) {
 		bsPair, bsOk := <-BSChannel
 		hpsPair, hpsOk := <-HPSChannel
 
-		tickerCount++
+		//Aumenta el contador segun el tiempo pasado
+		tickerCount = int64(int(math.Round(time.Since(timeStart).Seconds())))
+
 		// Si el canal se encuentre abierto, quiere decir que hay un par de elementos a intercambiar
 		if qsOk {
 			// Se realiza el intercambio
@@ -300,30 +304,30 @@ func graficar(slice []int) {
 			//En caso de que el canal se encuentre cerrado, quiere decir que el ordenamiento ha terminado
 		} else {
 			// Se usa un parpadeo verde en el título del ordenamiento para indicar que este fue éxitoso y ha terminado
-			successTitleColor(tickerCount, &pqs)
+			successTitleColor(&pqs)
 		}
 		if ssOk {
 			update(ssPair, &ssChart)
 		} else {
-			successTitleColor(tickerCount, &pss)
+			successTitleColor(&pss)
 		}
 		if isOk {
 			update(isPair, &isChart)
 		} else {
-			successTitleColor(tickerCount, &pis)
+			successTitleColor(&pis)
 		}
 		if bsOk {
 			update(bsPair, &bsChart)
 		} else {
-			successTitleColor(tickerCount, &pbs)
+			successTitleColor(&pbs)
 		}
 		if hpsOk {
 			update(hpsPair, &hpsChart)
 		} else {
-			successTitleColor(tickerCount, &phs)
+			successTitleColor(&phs)
 		}
 		// Al terminar de evaluar todos los canales, se actualizan las estadísticas y empieza de nuevo el ciclo
-		updateParagraph(tickerCount)
+		updateParagraph()
 		draw()
 	}
 	fmt.Scanln()

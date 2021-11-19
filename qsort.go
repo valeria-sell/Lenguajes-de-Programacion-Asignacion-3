@@ -7,6 +7,7 @@ import (
 var (
 	comparissonsQS = 0
 	swapsQS        = 0
+	evalsQS        = 0
 	totalTimeQS    time.Duration
 )
 
@@ -47,7 +48,9 @@ func partition(arr []int, l int, h int, canales chan []int, p *int) {
 	i := l - 1
 	for j := l; j <= h-1; j++ {
 		comparissonsQS++
+		evalsQS++
 		if arr[j] <= x {
+			evalsQS++
 			i++
 			swap(&arr[i], &arr[j])
 			//fmt.Println("i ", i, " j ", j)
@@ -87,6 +90,7 @@ func graphQuickSort(arr []int, l int, h int, updater chan []int) {
 
 	// Keep popping from stack while is not empty
 	for top >= 0 {
+		evalsQS++
 		pairsChannel := make(chan []int)
 		// Pop h and l
 		top -= 1
@@ -110,6 +114,7 @@ func graphQuickSort(arr []int, l int, h int, updater chan []int) {
 		// If there are elements on left side of pivot,
 		// then push left side to stack
 		if p-1 > l {
+			evalsQS++
 			top += 1
 			stack.Push(l) //push l
 			top += 1
@@ -119,6 +124,7 @@ func graphQuickSort(arr []int, l int, h int, updater chan []int) {
 		// If there are elements on right side of pivot,
 		// then push right side to stack
 		if p+1 < h {
+			evalsQS++
 			top += 1
 			stack.Push(p + 1) //push p+1
 			top += 1

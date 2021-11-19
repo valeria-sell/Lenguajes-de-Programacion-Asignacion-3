@@ -7,6 +7,7 @@ import (
 var (
 	comparissonsSS = 0
 	swapsSS        = 0
+	evalsSS        = 0
 	totalTimeSS    time.Duration
 )
 
@@ -15,7 +16,6 @@ func graphSelectionSort(randList []int, updater chan []int) {
 	go selectionsort(randList, pairsChannel)
 	for pair := range pairsChannel {
 		updater <- pair
-
 	}
 	close(updater)
 
@@ -25,10 +25,13 @@ func selectionsort(items []int, canales chan []int) {
 	startTimeSS := time.Now()
 	var n = len(items)
 	for i := 0; i < n; i++ {
+		evalsSS++
 		var minIdx = i
 		for j := i; j < n; j++ {
+			evalsSS++
 			comparissonsSS++
 			if items[j] < items[minIdx] {
+				evalsSS++
 				minIdx = j
 			}
 		}

@@ -7,6 +7,7 @@ import (
 var (
 	comparissonsHS = 0
 	swapsHS        = 0
+	evalsHPS       = 0
 	totalTimeHS    time.Duration
 )
 
@@ -23,11 +24,14 @@ func buildMaxHeap(arr []int, n int, canales chan []int) {
 	for i := 1; i < n; i++ {
 		//if child is bigger than parent
 		comparissonsHS++
+		evalsHPS++
 		if arr[i] > arr[(i-1)/2] {
+			evalsHPS++
 			j := i
 			// swap child and parent until
 			// parent is smaller
 			for arr[j] > arr[(j-1)/2] {
+				evalsHPS++
 				swap(&arr[j], &arr[(j-1)/2])
 				swapsHS++
 				canales <- []int{j, (j - 1) / 2}
@@ -48,20 +52,24 @@ func heapSort(arr []int, n int, canales chan []int) {
 		totalTimeHS = time.Since(startTimeHS)
 		canales <- []int{0, i}
 		swapsHS++
+		evalsHPS++
 		// maintaining heap property
 		// after each swapping
 		j := 0
 		index := 0
 
 		for {
+			evalsHPS++
 			index = 2*j + 1
 			if index > i {
+				evalsHPS++
 				break
 			}
 			// if left child is smaller than
 			// right child point index variable
 			// to right child
 			if arr[index] < arr[index+1] && index < (i-1) {
+				evalsHPS++
 				index++
 			}
 			// if parent is smaller than child
@@ -69,6 +77,7 @@ func heapSort(arr []int, n int, canales chan []int) {
 			// having higher value
 			comparissonsHS++
 			if arr[j] < arr[index] && index < i {
+				evalsHPS++
 				swap(&arr[j], &arr[index])
 				swapsHS++
 				totalTimeHS = time.Since(startTimeHS)
