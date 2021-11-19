@@ -14,24 +14,24 @@ var (
 //CODE FROM 	https://www.educative.io/edpresso/how-to-implement-a-stack-in-golang
 type Stack []int
 
-// IsEmpty check if stack is empty
+// IsEmpty revisa si el stack esta vacio
 func (s *Stack) IsEmpty() bool {
 	return len(*s) == 0
 }
 
-// Push a new value onto the stack
+// Push introduce un nuevo valor al stack
 func (s *Stack) Push(i int) {
-	*s = append(*s, i) // Simply append the new value to the end of the stack
+	*s = append(*s, i) // agrega el nuevo elemento al final del stack
 }
 
-// Pop Remove and return top element of stack. Return false if stack is empty.
+// Pop Hace pop al primer elemento de la pila. Retorna false si esta vacia
 func (s *Stack) Pop() (int, bool) {
 	if s.IsEmpty() {
 		return -1, false
 	} else {
-		index := len(*s) - 1   // Get the index of the top most element.
-		element := (*s)[index] // Index into the slice and obtain the element.
-		*s = (*s)[:index]      // Remove it from the stack by slicing it off.
+		index := len(*s) - 1   // obtiene indice del primer elemento
+		element := (*s)[index] // indexa al slice y obtiene el elemento.
+		*s = (*s)[:index]      // retira elemento del stack
 		return element, true
 	}
 }
@@ -41,8 +41,7 @@ func swap(a *int, b *int) {
 	*a = *b
 	*b = temp
 }
-
-/* This function is same in both iterative and recursive*/
+//funcion de particion
 func partition(arr []int, l int, h int, canales chan []int, p *int) {
 	x := arr[h]
 	i := l - 1
@@ -79,30 +78,30 @@ func graphQuickSort(arr []int, l int, h int, updater chan []int) {
 
 	//paint2(original)
 
-	// initialize top of stack
+	// inicializa stack
 	top := -1
 
-	// push initial values of l and h to stack
+	// push a l y j iniciales
 	top += 1
 	stack.Push(l) //push l
 	top += 1
 	stack.Push(h) //push h
 
-	// Keep popping from stack while is not empty
+	// condicion para seguir haciendo pop a la pila hasta que este vacia
 	for top >= 0 {
 		evalsQS++
 		pairsChannel := make(chan []int)
-		// Pop h and l
+		// Pop h y l
 		top -= 1
 		h, _ = stack.Pop() //pop
 		top -= 1
 		l, _ = stack.Pop() //pop
 
-		// Set pivot element at its correct position
-		// in sorted array
+		// pone el pivote en la condicion correcta
 		var p int
 		go partition(arr, l, h, pairsChannel, &p)
 		for pair := range pairsChannel {
+			//envia datos al canal
 			//fmt.Println(arr)
 			m.Lock()
 			totalTimeQS = time.Since(startTimeQS)
@@ -111,8 +110,8 @@ func graphQuickSort(arr []int, l int, h int, updater chan []int) {
 		}
 		//fmt.Println("p ", p)
 
-		// If there are elements on left side of pivot,
-		// then push left side to stack
+		// si hay elementos a la izq del pivote,
+		// hace push al lado izq al stack
 		if p-1 > l {
 			evalsQS++
 			top += 1
@@ -121,8 +120,8 @@ func graphQuickSort(arr []int, l int, h int, updater chan []int) {
 			stack.Push(p - 1) //push p-1
 		}
 
-		// If there are elements on right side of pivot,
-		// then push right side to stack
+		// si hay elementos a la derecho del pivote,
+		// hace push al lado derecho al stack
 		if p+1 < h {
 			evalsQS++
 			top += 1

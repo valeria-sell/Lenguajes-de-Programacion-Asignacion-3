@@ -32,19 +32,24 @@ func graphInsertionSort(randList []int, updater chan []int) {
 
 func insertionSort(arr []int, size int, canales chan []int) {
 	startTimeIS := time.Now()
+	// condicion del ciclo principal
 	for i := 1; i < size; i++ {
 		evalsIS++
 		key := arr[i]
 		j := i - 1
+		//si el elemento es mayor al key
 		for j >= 0 && arr[j] > key {
 			evalsIS++
 			comparissonsIS++
+			//intercambia elementos
 			arr[j+1] = arr[j]
 			totalTimeIS = time.Since(startTimeIS)
+			//envia a canal
 			canales <- []int{j, j + 1}
 			swapsIS++
 			j--
 		}
+		//avanza al siguiente elemento
 		arr[j+1] = key
 	}
 	close(canales)

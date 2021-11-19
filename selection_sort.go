@@ -24,9 +24,11 @@ func graphSelectionSort(randList []int, updater chan []int) {
 func selectionsort(items []int, canales chan []int) {
 	startTimeSS := time.Now()
 	var n = len(items)
+	//condicion del ciclo principal
 	for i := 0; i < n; i++ {
 		evalsSS++
 		var minIdx = i
+		//asigna el indice y busca el menor para colocarlo al inicio
 		for j := i; j < n; j++ {
 			evalsSS++
 			comparissonsSS++
@@ -35,8 +37,10 @@ func selectionsort(items []int, canales chan []int) {
 				minIdx = j
 			}
 		}
+		//intercambia valores
 		items[i], items[minIdx] = items[minIdx], items[i]
 		totalTimeSS = time.Since(startTimeSS)
+		//envia informacion al canal
 		canales <- []int{i, minIdx}
 		swapsSS++
 	}

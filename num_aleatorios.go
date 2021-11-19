@@ -6,7 +6,6 @@ import (
 	"time"
 )
 
-// prime returns true if n is a prime number.
 func is_prime(n int) bool {
 	for i := 2; i < n; i++ {
 		if n%i == 0 {
@@ -19,6 +18,7 @@ func is_prime(n int) bool {
 func gen_random_prime() int {
 	min := 11
 	max := 101
+	//genera semilla en funcion del tiempo
 	rand.Seed(time.Now().UnixNano())
 	randint := rand.Intn(max-min) + min
 	val := is_prime(4)
@@ -31,6 +31,7 @@ func gen_random_prime() int {
 }
 
 func lcg(a, c, m, semilla uint32) func() uint32 {
+	//glc
 	r := semilla
 	return func() uint32 {
 		r = (a*r + c) % m
@@ -39,6 +40,7 @@ func lcg(a, c, m, semilla uint32) func() uint32 {
 }
 
 func msg(semilla uint32) func() uint32 {
+	//aux del glc
 	g := lcg(214013, 2531011, 2048, semilla)
 	return func() uint32 {
 		return g() % (1 << 16)
@@ -46,17 +48,21 @@ func msg(semilla uint32) func() uint32 {
 }
 
 func gen_array(n int) []int {
+	//genera el array de tamano n
 	fmt.Println("\n--- Generando: --- ")
 	slice := make([]int, n)
 	semilla := gen_random_prime()
+	//genera semilla basado en el tiempo
 	fmt.Println("\n--- Valor semilla: --- ", semilla)
 	n_semilla := uint32(semilla)
 	msf := msg(n_semilla)
+	//genera array de num aleatorios basado en la semilla
 	for i := 0; i < n; i++ {
 		temp := msf()
 
 		slice[i] = int(temp)
 		fmt.Printf("%d ", slice[i])
+		//convierte los numeros al rango de 0 a 29 inclusive
 		slice[i] = slice[i] % 29
 
 	}
@@ -64,30 +70,3 @@ func gen_array(n int) []int {
 	return slice
 }
 
-/*func main() {
-	A := gen_array(100)
-	B := gen_array(400)
-	C := gen_array(600)
-	D := gen_array(800)
-	E := gen_array(1000)
-
-	for _, value := range A {
-		fmt.Printf("%d ", value)
-	}
-	fmt.Printf("\n")
-	for _, value := range B {
-		fmt.Printf("%d ", value)
-	}
-	fmt.Printf("\n")
-	for _, value := range C {
-		fmt.Printf("%d ", value)
-	}
-	fmt.Printf("\n")
-	for _, value := range D {
-		fmt.Printf("%d ", value)
-	}
-	fmt.Printf("\n")
-	for _, value := range E {
-		fmt.Printf("%d ", value)
-	}
-}*/

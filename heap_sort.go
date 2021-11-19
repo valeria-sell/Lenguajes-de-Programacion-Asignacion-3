@@ -22,14 +22,13 @@ func graphHeapSort(randList []int, updater chan []int) {
 
 func buildMaxHeap(arr []int, n int, canales chan []int) {
 	for i := 1; i < n; i++ {
-		//if child is bigger than parent
+		//si el nodo hijo es mayor al nodo padre
 		comparissonsHS++
 		evalsHPS++
 		if arr[i] > arr[(i-1)/2] {
 			evalsHPS++
 			j := i
-			// swap child and parent until
-			// parent is smaller
+			// intercambia nodo padre y nodo hijo hasta que el padre sea menor
 			for arr[j] > arr[(j-1)/2] {
 				evalsHPS++
 				swap(&arr[j], &arr[(j-1)/2])
@@ -43,38 +42,38 @@ func buildMaxHeap(arr []int, n int, canales chan []int) {
 
 func heapSort(arr []int, n int, canales chan []int) {
 	startTimeHS := time.Now()
+	//heap auxiliar
 	buildMaxHeap(arr, n, canales)
 	//fmt.Println(arr)
 	for i := n - 1; i > 0; i-- {
-		// swap value of first indexed
-		// with last indexed
+		// intercambia los valores del primer elemento indexado
+		// con el ultimo
 		swap(&arr[0], &arr[i])
 		totalTimeHS = time.Since(startTimeHS)
 		canales <- []int{0, i}
 		swapsHS++
 		evalsHPS++
-		// maintaining heap property
-		// after each swapping
+		// mantiene la integridad el heap durante cada intercambio
 		j := 0
 		index := 0
 
 		for {
+			//adaptacion del while loop para go
 			evalsHPS++
 			index = 2*j + 1
 			if index > i {
+				//condicion de parada del ciclo
 				evalsHPS++
 				break
 			}
-			// if left child is smaller than
-			// right child point index variable
-			// to right child
+			// si el hijo izq es menor que el hijo derecho
+			// apunta variable del indice al hijo derecho
 			if arr[index] < arr[index+1] && index < (i-1) {
 				evalsHPS++
 				index++
 			}
-			// if parent is smaller than child
-			// then swapping parent with child
-			// having higher value
+			// si el nodo padre es menor al nodo hijo
+			// intercambia nodo padre con el nodo hijo de mayor valor
 			comparissonsHS++
 			if arr[j] < arr[index] && index < i {
 				evalsHPS++
